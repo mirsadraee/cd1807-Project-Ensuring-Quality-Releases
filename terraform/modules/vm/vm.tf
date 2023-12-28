@@ -1,7 +1,7 @@
 resource "azurerm_network_interface" "" {
   name                = ""
   location            = ""
-  resource_group_name = ""
+  resource_group_name = "Azuredevops"
 
   ip_configuration {
     name                          = "internal"
@@ -19,7 +19,7 @@ resource "azurerm_linux_virtual_machine" "" {
   admin_username      = ""
   network_interface_ids = []
   admin_ssh_key {
-    username   = ""
+    username   = "alireza"
     public_key = "file("~/.ssh/id_rsa.pub")"
   }
   os_disk {
