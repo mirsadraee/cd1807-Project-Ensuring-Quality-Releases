@@ -28,10 +28,15 @@ Replace the APPSERVICEURL with the URL of your AppService once it's deployed.
 
 
 Altogether, our pipeline will create a number of resources:
+
 :white_check_mark:   A resource group
+
 :white_check_mark:   An App Service
+
 :white_check_mark:   A Virtual Network
+
 :white_check_mark:   A Network Security Group
+
 :white_check_mark:   A Virtual Machine
 
 Our demo REST API is deployed as part of our App Service, and our tests are executed against the REST API from the virtual machine created by Terraform as part of the CI/CD pipeline.
