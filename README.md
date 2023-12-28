@@ -11,10 +11,7 @@ The following dependecies of the project are needed;
 
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/)
 - [Terraform](https://www.terraform.io/downloads.html)
-- [JMeter](https://jmeter.apache.org/download_jmeter.cgi):
-
-  Use JMeter to open the `automatedtesting/jmeter/Starter.jmx` file.
-Replace the APPSERVICEURL with the URL of your AppService once it's deployed.
+- [JMeter](https://jmeter.apache.org/download_jmeter.cgi)
 - [Postman](https://www.postman.com/downloads/)
 - [Python](https://www.python.org/downloads/)
 - [Selenium](https://sites.google.com/a/chromium.org/chromedriver/getting-started)
@@ -48,8 +45,8 @@ Our demo REST API is deployed as part of our App Service, and our tests are exec
 Step by step explanation of how to get a dev environment running.
 
 List out the steps
-
-```
+<!-- 
+```bash
 (base) alirezamirsadraee@Alirezas-MBP cd1807-Project-Ensuring-Quality-Releases % terraform/environments/test/configure-tfstate-storage-account.sh 
 The public access to all blobs or containers in the storage account will be disallowed by default in the future, which means default value for --allow-blob-public-access is still null but will be equivalent to false.
 {
@@ -152,7 +149,88 @@ RESOURCE_GROUP_NAME=Azuredevops
 STORAGE_ACCOUNT_NAME=tfstate341231001
 CONTAINER_NAME=tfstate
 ACCOUNT_KEY=AxrP6DzaxhCGZf2CdVU0iomOFjlsuZFp4mHPpos0cd4YNSrKgp2tAh17fvxvyjna5yUk7mOo/U3R+ASthJ/oGg==
+``` -->
+
+### Dev Environment - Terraform
+To get started, we have firstly to loging to azure over
+```bash
+az login
 ```
+#### Setup Terraform Variables
+1- Replace the subscription variable values in the **Terraform/terraform.tfvars** based on the provided information by Azure Credentials:
+```bash
+subscription_id = "xxxx"
+client_id = "xxxx"
+client_secret = "xxxx"
+tenant_id = "xxxx"
+```
+2- Update the resource Group and Location variables in **Terraform/terraform.tfvars**:
+```bash
+location = "East US"
+resource_group_name = "Azuredevops"
+application_type = "myApplication"
+```
+#### Configure the Storage Account and teh State Backend
+for Terraform to save its state when run as a part of the CI/CD pipeline later. Here are the commands for Mac/Linux users:
+```bash
+chmod +x configure-tfstate-storage-account.sh
+./configure-tfstate-storage-account.sh
+```
+
+#### Update terraform/environments/test/main.tf
+Replace the values below in main.tf with the output from the Azure CLI.
+```bash
+terraform {
+    backend "azurerm" {
+            storage_account_name = "tstatexxxx"
+            container_name       = "tfstate"
+            key                  = "test.terraform.tfstate"
+            access_key           = "xxxx"
+    }
+}
+```
+
+#### Update terraform/modules/vm/vm.tf
+Update the **terraform/modules/vm/input.tf** file with the variables/values.
+Verify/update the terraform/modules/vm/vm.tf file with the variables declared in the input.tf.
+Once your VM will be ready using the final pipeline, you will have to SSH log into the machine to run Selenium functional (UI) tests. For SSH into the VM, either have an "admin_username/admin_password" pair in the vm.tf file or use SSH key pair, as explained in the next point.
+
+Run Terraform Commands
+Ensure the variables in the input.tf files are properly referenced in the modules and main.tf file. Ensure the values from the terraform.tfvars file are properly referenced in the main.tf file.
+
+After you have checked the main.tf and all modules in the terraform/modules/ directory, you can run these commands in your local terminal to deploy an Ubuntu Linux VM and the associated resources (vNetwork, security group, app service, and a public IP):
+```python
+## Assuming you are in the terraform/environments/test/ directory
+terraform init
+## Run "terraform init -upgrade" if you have changed the file contents/path
+terraform plan
+terraform apply
+```
+You should see a successful deployment message, and your Azure portal should have the following resources, as shown in the snapshot below.
+
+Here, we have the deployment message.
+<img src="./images/deployment.png" width="900">
+
+Here, we destroy the resources as we will deploy them again using the CI/CD Pieline.
+
+```bash
+terraform destroy
+```
+### Setup an Initial Pipeline
+The objective of this step is to set up a minimalistic DevOps pipeline to ensure the pipeline is set up correctly, before adding multiple stages to it.
+
+The main steps are:
+- create Azure project and Service Connection
+- Create an Agent Pool and an Agent
+- Configure the Agent (VM) - Install Docker
+- Configure the Agent (VM) - Install Agent Services
+- Create a DevOps Pipeline (Connect to GitHub repository, Select the GitHub Repository, Configure the Existing Azure Pipelines YAML file, and Edit/Review the azure-pipeline.yaml)
+
+### Prepare a VM Image
+
+### Final Pipeline
+
+### Logging and Monitoring
 
 ## Testing
 
